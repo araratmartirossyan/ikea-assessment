@@ -1,4 +1,4 @@
-import { ArticleEntity } from '../models/article.schema'
+import { ArticleEntity } from 'src/entities/interfaces'
 
 export interface ArticleInput {
   articles: ArticleEntity[]

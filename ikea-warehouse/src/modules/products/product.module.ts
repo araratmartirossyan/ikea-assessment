@@ -1,29 +1,22 @@
-import { Module } from '@nestjs/common';
-import { Connection } from 'mongoose';
-import { DatabaseModule } from 'src/database/database.module';
-import { ProductSchema } from './models/product.schema';
-import { ProductController } from './products.controller';
-import { ProductService } from './product.service';
-import { ArticleSchema } from './models/article.schema';
-
-export const productSchemaProvider = [
-  {
-    provide: 'PRODUCT_MODEL',
-    useFactory: (connection: Connection) =>
-      connection.model('Product', ProductSchema),
-    inject: ['DATABASE_CONNECTION'],
-  },
-  {
-    provide: 'ARTICLE_MODEL',
-    useFactory: (connection: Connection) =>
-      connection.model('Article', ArticleSchema),
-    inject: ['DATABASE_CONNECTION'],
-  },
-];
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { ProductController } from './products.controller'
+import { ProductService } from './product.service'
+import {
+  ProductSchema,
+  ArticleSchema,
+  ArticleContainsSchema
+} from 'src/entities'
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      ProductSchema,
+      ArticleSchema,
+      ArticleContainsSchema
+    ])
+  ],
   controllers: [ProductController],
-  providers: [ProductService, ...productSchemaProvider],
+  providers: [ProductService]
 })
-export class ProductModule { }
+export class ProductModule {}

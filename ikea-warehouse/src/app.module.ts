@@ -1,22 +1,21 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { Module } from '@nestjs/common'
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { DatabaseModule } from './database/database.module';
-import configuration from './config/configuration';
-import { ProductModule } from './modules/products/product.module';
+import { ProductModule } from './modules/products/product.module'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { ConfigService } from './modules/config/config.service'
+import { ConfigModule } from './modules/config/config.module'
 
 @Module({
   imports: [
-    DatabaseModule,
-    ConfigModule.forRoot({
-      load: [configuration],
+    ConfigModule,
+    TypeOrmModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => {
+        console.log(await configService.typeOrmModuleOptions())
+        return await configService.typeOrmModuleOptions()
+      },
+      inject: [ConfigService]
     }),
     ProductModule
-  ],
-  controllers: [AppController],
-  providers: [AppService],
-
+  ]
 })
-export class AppModule { }
+export class AppModule {}

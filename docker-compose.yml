@@ -1,17 +1,33 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: mongo
-    container_name: "mongodb"
-    networks:
-        - databases
-    volumes:
-      - "./_databases/mongodb/mongo-data:/data/db"
+  # mongodb:
+  #   image: mongo
+  #   container_name: "mongodb"
+  #   networks:
+  #       - databases
+  #   volumes:
+  #     - "./_databases/mongodb/mongo-data:/data/db"
+  #   ports:
+  #     - 27017:27017
+  #   command: mongod
+
+  db:
+    image: mysql:8.0
     ports:
-      - 27017:27017
-    command: mongod
-  dev:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=ikea
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=s0mePassword
+      - MYSQL_ROOT_PASSWORD=s0mePassword
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  mysql_server:
     build:
       context: ./ikea-warehouse
       target: development
@@ -19,8 +35,6 @@ services:
     ports:
       - 3000:3000
       - 9229:9229
-    networks:
-      - api
     volumes:
       - ./ikea-warehouse:/usr/src/ikea-warehouse
       - /usr/src/ikea-warehouse/node_modules
@@ -43,7 +57,3 @@ services:
   #     - .:/usr/src/app
   #     - /usr/src/app/node_modules
   #   restart: unless-stopped
-
-networks:
-  api:
-  databases:
