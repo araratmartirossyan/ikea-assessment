@@ -1,0 +1,1 @@
+1. I thought that most of warehouses uses excel sheets or csv to keep articles and products on "hands" then it more logical to upload into service csv or excel file. But for be sure we can have JSON uploaders well. 

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo
+    container_name: "mongodb"
+    networks:
+        - databases
+    volumes:
+      - "./_databases/mongodb/mongo-data:/data/db"
+    ports:
+      - 27017:27017
+    command: mongod
+  dev:
+    build:
+      context: ./ikea-warehouse
+      target: development
+    command: npm run start:debug
+    ports:
+      - 3000:3000
+      - 9229:9229
+    networks:
+      - api
+    volumes:
+      - ./ikea-warehouse:/usr/src/ikea-warehouse
+      - /usr/src/ikea-warehouse/node_modules
+    restart: unless-stopped
+
+  # prod:
+  #   container_name: nestjs_api_prod
+  #   image: nestjs-api-prod:1.0.0
+  #   build:
+  #     context: .
+  #     target: production
+  #     dockerfile: ./Dockerfile
+  #   command: npm run start:prod
+  #   ports:
+  #     - 3000:3000
+  #     - 9229:9229
+  #   networks:
+  #     - api
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   restart: unless-stopped
+
+networks:
+  api:
+  databases:
