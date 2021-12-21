@@ -8,7 +8,7 @@ import {
 import { ArticleContainsSchema } from './ArticleContains'
 import { ProductEntity } from './interfaces/product.interface'
 
-@Entity()
+@Entity('product')
 export class ProductSchema implements ProductEntity {
   @PrimaryGeneratedColumn()
   product_id: number
@@ -19,6 +19,6 @@ export class ProductSchema implements ProductEntity {
   @OneToMany(() => ArticleContainsSchema, article => article.product)
   contain_articles: ArticleContainsSchema[]
 
-  @Column()
+  @Column('decimal', { precision: 8, scale: 2 })
   price: number
 }

@@ -1,7 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToOne,
+  JoinColumn
+} from 'typeorm'
+import { ArticleContainsSchema } from '.'
 import { ArticleEntity } from './interfaces/article.interface'
 
-@Entity()
+@Entity('article')
 export class ArticleSchema {
   @PrimaryGeneratedColumn()
   art_id: number
@@ -11,4 +19,8 @@ export class ArticleSchema {
 
   @Column()
   stock: number
+
+  @OneToMany(() => ArticleContainsSchema, article => article.art_id)
+  @JoinColumn()
+  articlesContain: ArticleContainsSchema[]
 }

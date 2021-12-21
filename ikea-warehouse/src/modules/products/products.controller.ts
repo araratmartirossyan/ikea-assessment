@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   UploadedFile,
   UseInterceptors,
   BadRequestException
@@ -40,8 +39,6 @@ export class ProductController {
     if (isEmpty) {
       return new BadRequestException('File is Empty')
     }
-
-    console.log(data.products)
 
     return this.productService.setProducts(data.products)
   }

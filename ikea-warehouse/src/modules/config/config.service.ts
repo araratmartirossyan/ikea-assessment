@@ -19,7 +19,10 @@ export class ConfigService {
       password: 's0mePassword',
       database: 'ikea',
       entities: [ArticleSchema, ProductSchema, ArticleContainsSchema],
-      synchronize: true
+      synchronize: true,
+      extra: {
+        decimalNumbers: true
+      }
     }
   }
 }

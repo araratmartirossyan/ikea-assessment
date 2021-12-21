@@ -11,12 +11,13 @@ import { ProductSchema } from '.'
 import { ArticleSchema } from './Article.entity'
 import { ArticleContains } from './interfaces'
 
-@Entity()
+@Entity('article-contains')
 export class ArticleContainsSchema implements ArticleContains {
   @PrimaryGeneratedColumn()
   id: number
 
-  @JoinTable()
+  @ManyToOne(() => ArticleSchema)
+  @JoinColumn()
   art_id: ArticleSchema
 
   @ManyToOne(() => ProductSchema, product => product.contain_articles)

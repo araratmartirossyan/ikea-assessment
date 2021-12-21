@@ -1,5 +1,4 @@
 import { Injectable, Inject } from '@nestjs/common'
-import { Model } from 'mongoose'
 
 // Schemas
 import {
@@ -7,9 +6,14 @@ import {
   ArticleSchema,
   ArticleContainsSchema
 } from 'src/entities/'
-import { ArticleContains, ProductEntity } from 'src/entities/interfaces'
+import {
+  ArticleContains,
+  ArticleEntity,
+  ProductEntity
+} from 'src/entities/interfaces'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { ProductOutput } from './dto/ProductOutput.dto'
 
 @Injectable()
 export class ProductService {
@@ -24,102 +28,81 @@ export class ProductService {
     private articleContainsSchema: Repository<ArticleContainsSchema>
   ) {}
 
-  async getAll(): Promise<ProductSchema[]> {
-    return this.productSchema.find({
-      relations: ['contain_articles'],
-      join: {
-        alias: 'ArTIcle',
-        leftJoinAndSelect: {
-          following: 'contain_articles.art_id'
+  public async countQuantity(products: ProductEntity[]) {
+    const ids = products
+      .map(product => product.contain_articles.map(item => item.art_id.art_id))
+      .flat()
+
+    const articles = await this.articleSchema
+      .createQueryBuilder('ArticleSchema')
+      .where('art_id IN (:...ids)', { ids: [...new Set(ids)] })
+      .getMany()
+
+    let availiableArticles = [...articles]
+    const availiableProducts = []
+
+    products.forEach(product => {
+      const stocks = product.contain_articles.map(article => {
+        const findArticle = availiableArticles.find(
+          item => item.art_id === article.art_id.art_id
+        )
+        const quantity = Math.floor(findArticle.stock / article.amount_of)
+        return {
+          quantity,
+          articleId: article.art_id.art_id,
+          needed: article.amount_of
         }
-      }
+      })
+
+      const quantity = Math.min(...stocks.map(item => item.quantity))
+
+      availiableArticles = articles.map(article => {
+        const findStock = stocks.find(
+          neededStock => neededStock.articleId === article.art_id
+        )
+
+        if (!findStock) {
+          return article
+        }
+
+        return {
+          ...article,
+          stock: article.stock - quantity * findStock.needed
+        }
+      })
+
+      availiableProducts.push({
+        ...product,
+        quantity,
+        totalPrice: quantity === 0 ? product.price : quantity * product.price
+      })
     })
-    // const products = await this.productSchema.aggregate([
-    //   {
-    //     $lookup: {
-    //       from: 'articles',
-    //       foreignField: 'art_id',
-    //       localField: 'contain_articles.art_id',
-    //       as: 'articles'
-    //     }
-    //   },
-    //   {
-    //     $unwind: {
-    //       path: '$contain_articles.art_id'
-    //     }
-    //   }
-    // ])
-    // let articles = await this.articleSchema.find()
-    // return products
-    // const availiableProducts = []
-    // products.forEach(product => {
-    //   const stocks = product.contain_articles.map(article => {
-    //     const findArticle = articles.find(
-    //       item => item.art_id === article.art_id
-    //     )
-    //     const quantity = Math.floor(findArticle.stock / article.amount_of)
-    //     return {
-    //       quantity,
-    //       articleId: article.art_id,
-    //       needed: article.amount_of
-    //     }
-    //   })
-    //   const quantity = Math.min(...stocks.map(item => item.quantity))
-    //   articles = articles.map(article => {
-    //     const findStock = stocks.find(
-    //       neededStock => neededStock.articleId === article.art_id
-    //     )
-    //     if (!findStock) {
-    //       return article
-    //     }
-    //     return {
-    //       ...article,
-    //       stock: article.stock - quantity * findStock.needed
-    //     }
-    //   })
-    //   availiableProducts.push({
-    //     ...product,
-    //     quantity,
-    //     totalPrice: quantity * Number(product.price).toFixed(2)
-    //   })
-    // })
-    // return availiableProducts
+
+    return availiableProducts
+  }
+
+  async getAll(): Promise<ProductOutput[]> {
+    const products = await this.productSchema.find({
+      relations: ['contain_articles', 'contain_articles.art_id']
+    })
+
+    return this.countQuantity(products)
   }
 
   async setProducts(products: ProductSchema[]) {
     const savedAmountForArticles = await Promise.all(
       products.map(async product => {
-        const createdProduct = await this.productSchema.save(product)
+        const createdProduct = await this.productSchema.save({
+          ...product,
+          price: Number(product.price)
+        })
 
-        const articles = await Promise.all(
-          product.contain_articles.map(
-            async article =>
-              await this.articleContainsSchema.save({
-                product: createdProduct.product_id,
-                ...article
-              })
-          )
-        )
-
-        // const contain_articles = articles.map(item => ({ id: item.id }))
-
-        // console.log(articles, 'ARTICLES')
-
-        // await this.productSchema.update(
-        //   { product_id: createdProduct.product_id },
-        //   {
-        //     contain_articles
-        //   }
-        // )
-
-        // ({
-        //   ...product,
-        //   contains_articles: await Promise.all(
-        //     product.contain_articles.map(async article => ({
-        //       id: await (await this.articleContainsSchema.save(article)).id
-        //     }))
-        //   )
-        // })
+        product.contain_articles.forEach(article => {
+          this.articleContainsSchema.save({
+            product: createdProduct.product_id,
+            ...article
+          })
+        })
       })
     )
 
