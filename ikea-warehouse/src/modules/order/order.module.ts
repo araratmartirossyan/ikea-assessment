@@ -7,6 +7,7 @@ import {
   ArticleSchema,
   ArticleContainsSchema
 } from 'src/entities'
+import { ProductModule } from '../products/product.module'
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import {
       ProductSchema,
       ArticleSchema,
       ArticleContainsSchema
-    ])
+    ]),
+    ProductModule
   ],
   controllers: [OrderController],
   providers: [OrderService]

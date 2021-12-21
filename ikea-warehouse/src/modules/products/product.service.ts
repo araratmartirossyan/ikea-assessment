@@ -81,12 +81,46 @@ export class ProductService {
     return availiableProducts
   }
 
+  public async countAvaliableQuantity(products: ProductEntity[]) {
+    const ids = products
+      .map(product => product.contain_articles.map(item => item.art_id.art_id))
+      .flat()
+
+    const articles = await this.articleSchema
+      .createQueryBuilder('ArticleSchema')
+      .where('art_id IN (:...ids)', { ids: [...new Set(ids)] })
+      .getMany()
+
+    let availiableArticles = [...articles]
+    const availiableProducts = []
+
+    products.forEach(product => {
+      const stocks = product.contain_articles.map(article => {
+        const findArticle = availiableArticles.find(
+          item => item.art_id === article.art_id.art_id
+        )
+        const quantity = Math.floor(findArticle.stock / article.amount_of)
+        return quantity
+      })
+
+      const quantity = Math.min(...stocks.map(item => item))
+
+      availiableProducts.push({
+        ...product,
+        quantity,
+        totalPrice: quantity === 0 ? product.price : quantity * product.price
+      })
+    })
+
+    return availiableProducts
+  }
+
   async getAll(): Promise<ProductOutput[]> {
     const products = await this.productSchema.find({
       relations: ['contain_articles', 'contain_articles.art_id']
     })
 
-    return this.countQuantity(products)
+    return this.countAvaliableQuantity(products)
   }
 
   async setProducts(products: ProductSchema[]) {

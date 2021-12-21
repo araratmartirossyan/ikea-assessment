@@ -1,17 +1,6 @@
 version: '3.8'
 
 services:
-  # mongodb:
-  #   image: mongo
-  #   container_name: "mongodb"
-  #   networks:
-  #       - databases
-  #   volumes:
-  #     - "./_databases/mongodb/mongo-data:/data/db"
-  #   ports:
-  #     - 27017:27017
-  #   command: mongod
-
   db:
     image: mysql:8.0
     ports:
@@ -27,7 +16,7 @@ services:
     restart: always
     ports:
       - 8080:8080
-  mysql_server:
+  api:
     build:
       context: ./ikea-warehouse
       target: development
@@ -39,7 +28,18 @@ services:
       - ./ikea-warehouse:/usr/src/ikea-warehouse
       - /usr/src/ikea-warehouse/node_modules
     restart: unless-stopped
-
+    depends_on:
+      - db
+  frontend:
+    container_name: ikea-warehouse-frontend
+    build:
+      context: ./ikea-warehouse-frontend
+    ports:
+    - 3001:3001
+    volumes:
+      - './ikea-warehouse-frontend:/app'
+      - '/app/node_modules'
+    stdin_open: true
   # prod:
   #   container_name: nestjs_api_prod
   #   image: nestjs-api-prod:1.0.0

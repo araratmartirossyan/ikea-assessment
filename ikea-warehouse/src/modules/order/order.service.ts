@@ -6,10 +6,10 @@ import {
   ArticleSchema,
   ArticleContainsSchema
 } from 'src/entities/'
-import { ArticleContains, ProductEntity } from 'src/entities/interfaces'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateOrderInput } from './dto/CreateOrderInput.dto'
+import { ProductService } from '../products/product.service'
 
 @Injectable()
 export class OrderService {
@@ -21,26 +21,21 @@ export class OrderService {
     private articleSchema: Repository<ArticleSchema>,
 
     @InjectRepository(ArticleContainsSchema)
-    private articleContainsSchema: Repository<ArticleContainsSchema>
+    private articleContainsSchema: Repository<ArticleContainsSchema>,
+
+    private productService: ProductService
   ) {}
 
   async submitOrder({ products }: CreateOrderInput) {
-    // const foundProducts = await this.productSchema.find({
-    //   relations: ['contain_articles', 'contain_articles.art_id']
-    // })\
-
     const foundProducts = await this.productSchema
       .createQueryBuilder('product')
       .where('product_id IN (:...ids)', {
         ids: products.map(({ product_id }) => product_id)
       })
       .leftJoinAndSelect('product.contain_articles', 'contain_articles')
+      .leftJoinAndSelect('contain_articles.art_id', 'articles')
       .getMany()
 
-    return foundProducts
-
-    // Checking list of products in order
-    // - Checking if quantity still availiable on moment of submission
-    // returning result
+    return this.productService.countAvaliableQuantity(foundProducts)
   }
 }
