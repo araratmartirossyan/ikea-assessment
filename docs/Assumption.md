@@ -99,6 +99,7 @@ Api:
   - Create an Article module
   - Better typing for methods in services
   - Refactor types
+  - Swagger or Open Api
   - Nice To Have: Create microservices (Nest Microservices) per each module (Article, Products, Order)
   - Security rules such as:
     - Content Security Policy

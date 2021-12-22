@@ -131,6 +131,24 @@ export class ProductService {
   async setProducts(products: ProductSchema[]) {
     const savedAmountForArticles = await Promise.all(
       products.map(async product => {
+        const foundProduct = await this.productSchema.findOne({
+          name: product.name
+        })
+
+        if (foundProduct) {
+          await this.productSchema.update(
+            {
+              product_id: foundProduct.product_id
+            },
+            {
+              price: Number(product.price),
+              name: product.name
+            }
+          )
+
+          return foundProduct
+        }
+
         const createdProduct = await this.productSchema.save({
           ...product,
           price: Number(product.price)
