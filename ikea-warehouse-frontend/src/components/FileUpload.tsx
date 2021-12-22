@@ -1,4 +1,4 @@
-import { useState, FC, useRef } from 'react'
+import { useState, FC, useRef, MutableRefObject } from 'react'
 import { uploadFileFx } from '../stores/file.store'
 
 type Props = {
@@ -8,7 +8,7 @@ type Props = {
 export const FileUpload: FC<Props> = ({ fileType }) => {
   const [selectedFile, setSelectedFile] = useState<File>()
   const [isFilePicked, setIsFilePicked] = useState(false)
-  const input = useRef() as React.MutableRefObject<HTMLInputElement>
+  const input = useRef() as MutableRefObject<HTMLInputElement>
 
   const changeHandler = ({ target }: any) => {
     setSelectedFile(target.files[0])

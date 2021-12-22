@@ -30,13 +30,10 @@ export default function App() {
   }, [])
 
   const isEmptyArticles = useStore($isEmptyArticles)
-
+  const isEmptyProduct = useStore($isEmptyProducts)
   const userChoices = useStore($userChoices)
-  const isEmpty = combine(
-    $isEmptyArticles,
-    $isEmptyProducts,
-    (emptyArticles, emptyProducts) => emptyArticles || emptyProducts
-  ).getState()
+
+  const isEmpty = isEmptyArticles || isEmptyProduct
 
   return (
     <>
