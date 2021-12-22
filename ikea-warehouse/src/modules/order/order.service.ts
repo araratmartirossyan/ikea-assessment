@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
 
-// Schemas
-import { ProductSchema } from 'src/entities/'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+
+// Types
+import { ProductSchema } from 'src/entities/'
 import { CreateOrderInput } from './dto/CreateOrderInput.dto'
 import { ProductService } from '../products/product.service'
 

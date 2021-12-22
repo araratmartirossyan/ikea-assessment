@@ -1,15 +1,15 @@
-
+## Process
 1. I chose the Web-App + Rest API format of application because I have more experience with it and understand pitfalls.
 2. For Backend I prefer to use well test and known framework - Nest Js. Like the way how it works. 
 3. For Frontend I chose to use React, with Vite, for the experiment I used Effector as state manager. (UPDATE: Amazing state manager, except sometimes you can just miss some piece of communication between Effects and Stores)
    
 4. In case of uploading files we need to update currently existing values if the price or articles amount is changed? I think it's smart to do, but I will keep it to the end of the task to concentrate on Requirements first.  
-   1. I created File Uploader and attached update in case of similar art_id present in uploaded file.
+   1. I created File Uploader and attached an update in case of a similar art_id present in the uploaded file.
    2. Same for Product uploader
 
-5. My favorite database is MongoDB because it's super easy to use. Almost by snap. I can easily create aggregation pipelines and prefer this way to work versus SQL queries. But this time I gonna try MySql.
+5. My favorite database is MongoDB. But this time I gonna make a challenge for myself and will try MySql.
    
-6. I made two POCs one based on mongo, another on mysql. With mongo DB everything looks pretty easy to get values and calculate the final result, but from a schema perspective, I saw that MySQL may feet better. We have 3 Tables Article - Product and ArticleContain. And I see a clear relationship between them. I remembered how I first time learned Mysql and made a similar structure and decided to go with Mysql. In the perspective of usage, It can handle any amount of data, up to as much as 50 million rows or more. For Warehousing solutions, it can be helpful.
+6. I made two POCs one based on mongo, another on MySQL. With mongo DB everything looks pretty easy to get values and calculate the final result, but im not sure about future prove. I think MySQL may fit better. We have 3 Tables Article - Product and ArticleContain. And I see a clear relationship between them. (I remembered how I first time learned Mysql and made a similar structure). Decided to go with Mysql. In the perspective of usage, It can handle any amount of data, up to as much as 50 million rows or more. For Warehousing solutions, it can be helpful.
 
 7. I started to calculate quantities of products and after couple implementation of this function choosed the one which i think doing job easier from code perspective. 
 ```javascript
@@ -66,23 +66,75 @@
   3. Possible UI improvements:
      - Add a list of articles per product
      - Add quantity selector
-     - Create standart components (Buttons, Form and etc)
+     - Create standart components (Buttons, Form, etc)
      - Properly type inputs and outputs
      - Show possible product replacements
      - Show which exactly article is not available in case of invalid order
      - Add possibility to upload CSV and XLS files
     
 15. Everything looks good, time to put everything together with Docker.
-    1.  I created Docker per each project
+    1.  I created Docker for each project
     2.  Made Docker-Compose
-    3.  Added "wait" script for api to wait db host
+    3.  Added "wait" script for api to wait for DB host
     4.  Attached env variables everywhere
-    5.  Double checked if it possible to run project on new machine without any problems
-16. Already out of time, i really wanna split Dockerfile for production and dev but i still need to finalize assumption and documentation:
-    1.  Possible improvments in Docker:
+    5.  Double checked if it is possible to run the project on a new machine without any problems
+16. Already out of time, I really wanna split Dockerfile for production and dev but I still need to finalize assumption and documentation:
+    1.  Possible improvements in Docker:
         - Add Dev and Prod staging
         - Split variables between Dev and Prod
         - Add deployment scripts for Git Hub actions
-        - Maybe we need to add k8s here if it will be real solution (because i can imagine amount of articles and products which can be consumed per second)
+        - Maybe we need to add k8s here if it will be a real solution (because I can imagine the number of articles and products which can be consumed per second)
 17. Working on documentation/
 
+
+## Improvements
+Api:
+  - Refactor algorithm to make it work with SQL queries and easy with a js function
+  - Write tests for all pieces of logic related to calculation and data exchange
+  - Write end 2 end tests for flow
+  - Refactor update methods for articles/products to make them easy to update and less cheap
+  - Better typing for input-output
+  - Validation of input and output
+  - Parse CSV or XLS file not only JSON
+  - Create an Article module
+  - Better typing for methods in services
+  - Refactor types
+  - Nice To Have: Create microservices (Nest Microservices) per each module (Article, Products, Order)
+  - Security rules such as:
+    - Content Security Policy
+    - DNS Prefetch Control
+    - Expect CT
+    - Frame Guard
+    - No Sniff
+    - Permitted Cross-Domain Policies
+    - Referrer-Policy
+    - XSS Filter
+    - DDoS protection timeout
+
+FE:
+  - Write unit tests
+  - Create more components stack (Buttons, Form, etc)
+  - Types for Effector Store
+  - Add a list of articles per product
+  - Add quantity selector component
+  - Properly type inputs and outputs for request
+  - Show possible product replacements
+  - Show which exactly article is not available in case of invalid order
+  - Add possibility to upload CSV and XLS files
+  - Work better on order flow (state of order can be improved)
+  - Add quantity selector to OrderSummary
+
+Docker and Deployment:
+  - Add Dev and Prod staging
+  - Split variables between Dev and Prod
+  - Add deployment scripts for Git Hub actions
+  - Maybe we need to add k8s here if it will be the real solution (because I can imagine the amount of articles and products which can be consumed per second)
+  - Add pre-commit and linting + test stage in the pipeline
+
+Nice to Have:
+ - Auth for each warehouse worker to protect data
+ - K8S per each microservice and microservices itself
+
+
+## Task review:
+It's one of the most interesting technical challenges which I built in my carrier. I enjoyed every problem and lost count of time. If this work is full of the same challenges, then I will enjoy it every day. I can only imagine what kind of experience I will gain, doing such tasks. Thanks for the chance to work on it. 
