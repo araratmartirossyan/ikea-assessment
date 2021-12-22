@@ -7,6 +7,7 @@ import { Warehouse } from '..'
 
 // UserChoise
 export const $userChoices = createStore<Warehouse.ProductEntity[]>([])
+
 export const userChoise = createEvent<Warehouse.ProductEntity>()
 
 $userChoices.on(userChoise, (state, product) => {

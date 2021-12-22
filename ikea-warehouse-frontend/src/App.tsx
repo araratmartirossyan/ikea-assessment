@@ -19,6 +19,7 @@ import { $isEmptyProducts, getProductsFx } from './stores/products.store'
 import { $isEmptyArticles, getArticlesFx } from './stores/articles.store'
 import { EmptyState } from './components/EmptyState'
 import { combine } from 'effector'
+import { $userChoices, checkProduct } from './stores/order.store'
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -28,10 +29,9 @@ export default function App() {
     getArticlesFx()
   }, [])
 
-  const isLoading = useStore(getProductsFx.pending)
   const isEmptyArticles = useStore($isEmptyArticles)
 
-  const isEmptyProducts = useStore($isEmptyProducts)
+  const userChoices = useStore($userChoices)
   const isEmpty = combine(
     $isEmptyArticles,
     $isEmptyProducts,
@@ -70,6 +70,17 @@ export default function App() {
               <div className="flex w-full">
                 <div className="w-full mr-4 mt-11">
                   <ProductTable />
+                  <div className="mt-5 flex justify-end">
+                    <button
+                      onClick={() => checkProduct()}
+                      disabled={userChoices.length === 0}
+                      className={
+                        'disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none disabled:cursor-not-allowed w-half bg-indigo-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500'
+                      }
+                    >
+                      Add To Order
+                    </button>
+                  </div>
                 </div>
                 <div className="w-1/2">
                   <OrderSummary />

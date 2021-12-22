@@ -8,7 +8,7 @@ type Props = {
 export const FileUpload: FC<Props> = ({ fileType }) => {
   const [selectedFile, setSelectedFile] = useState<File>()
   const [isFilePicked, setIsFilePicked] = useState(false)
-  const input = useRef()
+  const input = useRef() as React.MutableRefObject<HTMLInputElement>
 
   const changeHandler = ({ target }: any) => {
     setSelectedFile(target.files[0])
@@ -30,7 +30,7 @@ export const FileUpload: FC<Props> = ({ fileType }) => {
     <div className="flex mr-4">
       <div className="mb-3 ">
         <label className="form-label inline-block mb-2 text-gray-700">
-          Upload {fileType}
+          Upload <b className="text-red-600">{fileType}</b>
         </label>
         <input
           ref={input}
@@ -62,7 +62,7 @@ export const FileUpload: FC<Props> = ({ fileType }) => {
           disabled={!isFilePicked}
           className="disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none disabled:cursor-not-allowed bg-green-600 hover:bg-indigo-dark text-white font-bold py-2 px-4 w-full inline-flex items-center"
         >
-          Upload
+          Upload {fileType}
         </button>
       </div>
     </div>

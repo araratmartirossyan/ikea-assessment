@@ -1,7 +1,7 @@
 import { useList } from 'effector-react'
 
 import { $products } from '../stores/products.store'
-import { checkProduct, userChoise } from '../stores/order.store'
+import { userChoise } from '../stores/order.store'
 
 import { Table, TableCell, TableAction, TableHead } from './table'
 
@@ -49,12 +49,6 @@ export const ProductTable = () => {
                 <option key={`${product.product_id}_${item}`}>{item}</option>
               ))}
             </select>
-            <button
-              onClick={() => checkProduct()}
-              className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
-            >
-              Add To Order
-            </button>
           </TableAction>
         </tr>
       ))}

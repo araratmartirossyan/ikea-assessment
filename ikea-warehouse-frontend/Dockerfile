@@ -1,20 +1,39 @@
-# pull official base image
-FROM node:14
+# # pull official base image
+# FROM node:14
 
-# set working directory
+# # set working directory
+# WORKDIR /app
+
+# COPY entrypoint.sh /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
+
+# ADD . .
+
+
+# COPY package.json ./
+# COPY yarn*.json ./
+# RUN yarn
+
+# ENTRYPOINT ["/entrypoint.sh"]
+
+# EXPOSE 3000
+# # add app
+# COPY . ./
+
+# # start app
+# CMD ["yarn", "dev"]
+
+FROM node:15.12.0
+
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# install app dependencies
-COPY package.json ./
-COPY yarn*.json ./
-RUN yarn
-RUN npm install react-scripts@3.4.1 -g --silent
+ADD . .
 
-# add app
-COPY . ./
+RUN npm install
 
-# start app
-CMD ["yarn", "dev"]
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["npm", "run", "dev"]

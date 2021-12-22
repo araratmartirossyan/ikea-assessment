@@ -2,7 +2,7 @@
   "name": "ikea-warehouse-frontend",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite --port 3002",
+    "dev": "vite --port 3001 --host",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },

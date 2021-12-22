@@ -7,11 +7,10 @@ services:
     ports:
       - 3306:3306
     environment:
-      - MYSQL_DATABASE=ikea
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=s0mePassword
-      - MYSQL_ROOT_PASSWORD=s0mePassword
-
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
   adminer:
     image: adminer
     restart: always
@@ -21,7 +20,12 @@ services:
     build:
       context: ./ikea-warehouse
       target: development
-    command: npm run start:debug
+    environment:
+      - WAIT_HOSTS=db:3306
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_HOST=${DB_HOST}
     ports:
       - 3000:3000
       - 9229:9229
@@ -35,12 +39,15 @@ services:
     container_name: ikea-warehouse-frontend
     build:
       context: ./ikea-warehouse-frontend
+      dockerfile: ./Dockerfile
+    environment:
+      VITE_API_URL: "${VITE_API_URL}"
+    command: yarn dev
     ports:
     - 3001:3001
     volumes:
       - './ikea-warehouse-frontend:/app'
       - '/app/node_modules'
-    stdin_open: true
   # prod:
   #   container_name: nestjs_api_prod
   #   image: nestjs-api-prod:1.0.0

@@ -1,5 +1,8 @@
 FROM node:14 AS development
 
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.6.0/wait /wait
+RUN chmod +x /wait
+
 WORKDIR /usr/src/ikea-warehouse
 
 COPY package*.json /usr/src/back/
@@ -9,6 +12,7 @@ RUN yarn
 
 COPY . .
 RUN yarn build
+CMD /wait && yarn start:dev
 
 FROM node:14 as production
 

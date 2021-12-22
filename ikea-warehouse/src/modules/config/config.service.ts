@@ -14,10 +14,10 @@ export class ConfigService {
   ): Promise<TypeOrmModuleOptions> {
     return {
       type: 'mysql',
-      host: 'db',
-      username: 'admin',
-      password: 's0mePassword',
-      database: 'ikea',
+      host: process.env.MYSQL_HOST,
+      username: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
       entities: [ArticleSchema, ProductSchema, ArticleContainsSchema],
       synchronize: true,
       extra: {

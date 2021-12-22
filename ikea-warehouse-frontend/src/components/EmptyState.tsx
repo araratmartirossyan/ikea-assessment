@@ -1,3 +1,6 @@
+import articles from '../../assets/articles.json'
+import products from '../../assets/products.json'
+
 export const EmptyState = () => {
   return (
     <button
@@ -20,10 +23,48 @@ export const EmptyState = () => {
         />
       </svg>
       <span className="mt-2 block text-sm font-medium text-gray-900">
-        Upload Articles.json file to start use this software and then upload
-        Products.json
-        <br></br>
-        <small>please use the input above</small>
+        To begin:
+        <ul>
+          <li className="mb-2">
+            1. Use "Choose file" button to upload articles.json file{' '}
+            <a
+              className="text-blue-400 underline"
+              href={`data:text/json;charset=utf-8,${encodeURIComponent(
+                JSON.stringify(articles)
+              )}`}
+              download="articles.json"
+            >
+              (file example)
+            </a>
+          </li>
+          <li className="mb-2">
+            2. Then use second "Choose file" (it will appear after articles are
+            uploaded), to upload products.json file{' '}
+            <a
+              href={`data:text/json;charset=utf-8,${encodeURIComponent(
+                JSON.stringify(products)
+              )}`}
+              download="products.json"
+              className="text-blue-400 underline"
+            >
+              (file example)
+            </a>
+          </li>
+          <li className="mb-2">
+            <small>
+              * Please use the inputs above{' '}
+              <b className="underline italic">
+                (use different input per each file type)
+              </b>
+            </small>
+          </li>
+          <li>
+            <small>
+              * To initiate uploading please click on green button under Choose
+              File bar
+            </small>
+          </li>
+        </ul>
       </span>
     </button>
   )
