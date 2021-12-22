@@ -1,4 +1,6 @@
-import { Injectable, Inject } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
 
 // Schemas
 import {
@@ -6,14 +8,9 @@ import {
   ArticleSchema,
   ArticleContainsSchema
 } from 'src/entities/'
-import {
-  ArticleContains,
-  ArticleEntity,
-  ProductEntity
-} from 'src/entities/interfaces'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { ProductOutput } from './dto/ProductOutput.dto'
+
+import { ProductInput, ProductOutput } from './dto/ProductOutput.dto'
+import { ArticleEntity } from 'src/entities/interfaces'
 
 @Injectable()
 export class ProductService {
@@ -28,15 +25,19 @@ export class ProductService {
     private articleContainsSchema: Repository<ArticleContainsSchema>
   ) {}
 
-  public async countQuantity(products: ProductEntity[]) {
+  private async findArticlesByProducts(products: Partial<ProductInput[]>) {
     const ids = products
       .map(product => product.contain_articles.map(item => item.art_id.art_id))
       .flat()
 
-    const articles = await this.articleSchema
+    return this.articleSchema
       .createQueryBuilder('ArticleSchema')
       .where('art_id IN (:...ids)', { ids: [...new Set(ids)] })
       .getMany()
+  }
+
+  public async countQuantity(products: ProductInput[]) {
+    const articles = await this.findArticlesByProducts(products)
 
     let availiableArticles = [...articles]
     const availiableProducts = []
@@ -46,15 +47,17 @@ export class ProductService {
         const findArticle = availiableArticles.find(
           item => item.art_id === article.art_id.art_id
         )
-        const quantity = Math.floor(findArticle.stock / article.amount_of)
+
+        const neededAmount = product.quantity * article.amount_of
+
         return {
-          quantity,
+          possibleToSell: findArticle.stock >= neededAmount,
           articleId: article.art_id.art_id,
-          needed: article.amount_of
+          needed: neededAmount
         }
       })
 
-      const quantity = Math.min(...stocks.map(item => item.quantity))
+      const isAvailiable = stocks.every(item => item.possibleToSell === true)
 
       availiableArticles = articles.map(article => {
         const findStock = stocks.find(
@@ -67,29 +70,22 @@ export class ProductService {
 
         return {
           ...article,
-          stock: article.stock - quantity * findStock.needed
+          stock: article.stock - findStock.needed
         }
       })
 
       availiableProducts.push({
         ...product,
-        quantity,
-        totalPrice: quantity === 0 ? product.price : quantity * product.price
+        totalPrice: isAvailiable ? product.quantity * product.price : 0,
+        isAvailiable: isAvailiable
       })
     })
 
     return availiableProducts
   }
 
-  public async countAvaliableQuantity(products: ProductEntity[]) {
-    const ids = products
-      .map(product => product.contain_articles.map(item => item.art_id.art_id))
-      .flat()
-
-    const articles = await this.articleSchema
-      .createQueryBuilder('ArticleSchema')
-      .where('art_id IN (:...ids)', { ids: [...new Set(ids)] })
-      .getMany()
+  public async countAvaliableQuantity(products: ProductSchema[]) {
+    const articles = await this.findArticlesByProducts(products)
 
     let availiableArticles = [...articles]
     const availiableProducts = []
@@ -108,7 +104,8 @@ export class ProductService {
       availiableProducts.push({
         ...product,
         quantity,
-        totalPrice: quantity === 0 ? product.price : quantity * product.price
+        totalPrice: quantity === 0 ? product.price : quantity * product.price,
+        isAvailiable: quantity !== 0
       })
     })
 
@@ -120,7 +117,15 @@ export class ProductService {
       relations: ['contain_articles', 'contain_articles.art_id']
     })
 
+    if (products.length === 0) {
+      return []
+    }
+
     return this.countAvaliableQuantity(products)
+  }
+
+  async getArticles(): Promise<ArticleEntity[]> {
+    return this.articleSchema.find()
   }
 
   async setProducts(products: ProductSchema[]) {
@@ -137,6 +142,8 @@ export class ProductService {
             ...article
           })
         })
+
+        return createdProduct
       })
     )
 
@@ -145,12 +152,80 @@ export class ProductService {
 
   async setArticles(articles: ArticleSchema[]) {
     // Cleanup in case of some injection
-    const input = articles.map(({ art_id, name, stock }) => ({
-      art_id,
-      name,
-      stock
-    }))
+    return Promise.all(
+      articles.map(async ({ art_id, name, stock }) => {
+        const findCurrentArticle = await this.articleSchema.findOne({
+          where: {
+            art_id
+          }
+        })
 
-    return this.articleSchema.save(input)
+        if (findCurrentArticle) {
+          const updated = this.articleSchema.update(
+            { art_id },
+            {
+              stock: findCurrentArticle.stock + Number(stock)
+            }
+          )
+
+          return updated
+        }
+
+        return this.articleSchema.save({
+          art_id,
+          name,
+          stock: Number(stock)
+        })
+      })
+    )
+  }
+
+  public async updateArticleStock(products: ProductInput[]) {
+    const flatProducts = products
+      .map(product =>
+        product.contain_articles.map(contain => ({
+          art_id: contain.art_id.art_id,
+          amount: contain.amount_of * product.quantity
+        }))
+      )
+      .flat()
+
+    const groupedArticles = flatProducts.reduce((acc, article) => {
+      const findArticleIndex = acc.findIndex(
+        item => item.art_id === article.art_id
+      )
+
+      if (findArticleIndex === -1) {
+        acc.push(article)
+
+        return acc
+      }
+
+      acc[findArticleIndex].amount =
+        acc[findArticleIndex].amount + article.amount
+
+      return acc
+    }, [])
+
+    const updatedStock = await Promise.all(
+      groupedArticles.map(async ({ art_id, amount }) => {
+        const findCurrentArticle = await this.articleSchema.findOne({
+          where: {
+            art_id
+          }
+        })
+
+        return this.articleSchema.update(
+          {
+            art_id
+          },
+          {
+            stock: findCurrentArticle.stock - amount
+          }
+        )
+      })
+    )
+
+    return updatedStock
   }
 }

@@ -7,7 +7,7 @@ type Props = {
 
 export const Table: FC<Props> = ({ children, header }) => {
   return (
-    <table className="min-w-full">
+    <table className="min-w-full border rounded">
       <thead>{header}</thead>
       <tbody className="bg-white divide-y divide-gray-100">{children}</tbody>
     </table>

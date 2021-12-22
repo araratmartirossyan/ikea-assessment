@@ -2,13 +2,11 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToOne,
   ManyToOne,
-  JoinColumn,
-  JoinTable
+  JoinColumn
 } from 'typeorm'
 import { ProductSchema } from '.'
-import { ArticleSchema } from './Article.entity'
+import { ArticleSchema } from './Article'
 import { ArticleContains } from './interfaces'
 
 @Entity('article-contains')

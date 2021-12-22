@@ -9,6 +9,11 @@ export class OrderController {
 
   @Post('/orders')
   async createOrder(@Body() products: CreateOrderInput) {
+    return this.orderService.checkOrder(products)
+  }
+
+  @Post('/orders/submit')
+  async submitOrder(@Body() products: CreateOrderInput) {
     return this.orderService.submitOrder(products)
   }
 }

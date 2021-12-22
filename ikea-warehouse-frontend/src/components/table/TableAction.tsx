@@ -1,7 +1,7 @@
-import { FC } from 'react'
+import { FC, ReactNode } from 'react'
 
 type Props = {
-  children?: JSX.Element | JSX.Element[]
+  children?: ReactNode
 }
 
 export const TableAction: FC<Props> = ({ children }) => {

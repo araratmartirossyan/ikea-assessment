@@ -1,32 +1,30 @@
-import { AxiosResponse } from 'axios'
-import { createEvent, createStore, createEffect, sample } from 'effector'
+import { createStore, createEffect, sample } from 'effector'
+import { Warehouse } from '..'
 import axiosFn from '../utils/request'
 
-// const products = createEvent()
-
-interface ProductsResponse extends AxiosResponse {}
-
 export const getProductsFx = createEffect(async () => {
-  const response = await axiosFn<ProductsResponse>({
+  const response = await axiosFn<Warehouse.ProductsResponse>({
     url: 'products'
   })
 
-  if (response.statusText !== 'ok') {
+  if (response.statusText !== 'OK') {
     throw Error(response.statusText)
   }
   return response.data
 })
+
+export const $isEmptyProducts = createStore(true)
 
 export const $productsError = createStore({}).on(
   getProductsFx.failData,
   (state, error) => error
 )
 
-export const $products = createStore([]).on(
+$isEmptyProducts.on(getProductsFx.doneData, (_, data) => {
+  return data.length === 0
+})
+
+export const $products = createStore<Warehouse.ProductEntity[]>([]).on(
   getProductsFx.doneData,
   (_, products) => products
 )
-
-// export const $selectedBeer = createStore(null);
-// export const selectBeer = createEvent();
-// $selectedBeer.on(selectBeer, (state, beer) => beer);

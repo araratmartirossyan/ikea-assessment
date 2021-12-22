@@ -1,84 +1,46 @@
 // Depedencies
 import { useEffect, useState } from 'react'
 import { MenuIcon } from '@heroicons/react/outline'
-import { useStore, useList } from 'effector-react'
+import { useStore } from 'effector-react'
+import { ToastContainer } from 'react-toastify'
 
 // Components
 import {
   MobileSidebar,
   Sidebar,
-  Table,
-  TableCell,
-  TableAction,
-  TableHead,
-  MainWrapper
+  MainWrapper,
+  ProductTable,
+  OrderSummary,
+  FileUpload
 } from './components'
 
 // stores
-import {
-  $productsError,
-  getProductsFx,
-  $products
-} from './stores/products.store'
-
-const products = [
-  {
-    name: 'Dining Chair',
-    product_id: 1,
-    quantity: 2,
-    contain_articles: [
-      {
-        art_id: '1',
-        amount_of: '4'
-      },
-      {
-        art_id: '2',
-        amount_of: '8'
-      },
-      {
-        art_id: '3',
-        amount_of: '1'
-      }
-    ],
-    price: 39.99
-  },
-  {
-    name: 'Dining Table',
-    product_id: 2,
-    quantity: 0,
-    contain_articles: [
-      {
-        art_id: '1',
-        amount_of: '4'
-      },
-      {
-        art_id: '2',
-        amount_of: '8'
-      },
-      {
-        art_id: '4',
-        amount_of: '1'
-      }
-    ],
-    price: 99.99
-  }
-]
-
-const Error = () => {
-  const error = useStore($productsError)
-  return error && 'Whoops something went wrong'
-}
+import { $isEmptyProducts, getProductsFx } from './stores/products.store'
+import { $isEmptyArticles, getArticlesFx } from './stores/articles.store'
+import { EmptyState } from './components/EmptyState'
+import { combine } from 'effector'
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
   useEffect(() => {
     getProductsFx()
+    getArticlesFx()
   }, [])
 
   const isLoading = useStore(getProductsFx.pending)
+  const isEmptyArticles = useStore($isEmptyArticles)
+
+  const isEmptyProducts = useStore($isEmptyProducts)
+  const isEmpty = combine(
+    $isEmptyArticles,
+    $isEmptyProducts,
+    (emptyArticles, emptyProducts) => emptyArticles || emptyProducts
+  ).getState()
 
   return (
     <>
+      <ToastContainer />
       <MobileSidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -97,44 +59,23 @@ export default function App() {
               <MenuIcon className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
-          <MainWrapper title="Products">
-            {isLoading && <span>Is Loading</span>}
+          <MainWrapper title="Warehouse">
+            <div className="flex">
+              <FileUpload fileType="articles" />
 
-            <Table
-              header={
-                <tr>
-                  <TableHead key="product"> Product </TableHead>
-                  <TableHead key="Stock"> Stock </TableHead>
-                  <TableHead key="Actions"> Actions </TableHead>
-                </tr>
-              }
-            >
-              {useList($products, ({ product_id, name, quantity }) => (
-                <tr key={product_id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3 lg:pl-2">
-                      <div
-                        className={`${
-                          quantity > 0 ? 'bg-green-600' : 'bg-red-600'
-                        } flex-shrink-0 w-2.5 h-2.5 rounded-full`}
-                        aria-hidden="true"
-                      />
-                      <a href="#" className="truncate hover:text-gray-600">
-                        <span>{name}</span>
-                      </a>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span>{quantity}</span>
-                  </TableCell>
-                  <TableAction>
-                    <a className="text-indigo-600 hover:text-indigo-900 cursor-pointer">
-                      Add To Order
-                    </a>
-                  </TableAction>
-                </tr>
-              ))}
-            </Table>
+              {!isEmptyArticles && <FileUpload fileType="products" />}
+            </div>
+            {isEmpty && <EmptyState />}
+            {!isEmpty && (
+              <div className="flex w-full">
+                <div className="w-full mr-4 mt-11">
+                  <ProductTable />
+                </div>
+                <div className="w-1/2">
+                  <OrderSummary />
+                </div>
+              </div>
+            )}
           </MainWrapper>
         </div>
       </div>

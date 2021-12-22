@@ -7,6 +7,7 @@ import {
   BadRequestException
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { get } from 'http'
 import { isValidJSONString } from 'src/utils/validateJson.util'
 import { ProductService } from './product.service'
 
@@ -17,6 +18,11 @@ export class ProductController {
   @Get('/products')
   async products() {
     return this.productService.getAll()
+  }
+
+  @Get('/articles')
+  async articles() {
+    return this.productService.getArticles()
   }
 
   @Post('/products/upload')

@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 // Schemas
-import {
-  ProductSchema,
-  ArticleSchema,
-  ArticleContainsSchema
-} from 'src/entities/'
+import { ProductSchema } from 'src/entities/'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateOrderInput } from './dto/CreateOrderInput.dto'
@@ -17,16 +13,10 @@ export class OrderService {
     @InjectRepository(ProductSchema)
     private productSchema: Repository<ProductSchema>,
 
-    @InjectRepository(ArticleSchema)
-    private articleSchema: Repository<ArticleSchema>,
-
-    @InjectRepository(ArticleContainsSchema)
-    private articleContainsSchema: Repository<ArticleContainsSchema>,
-
     private productService: ProductService
   ) {}
 
-  async submitOrder({ products }: CreateOrderInput) {
+  private async updateProductsQuantity({ products }: CreateOrderInput) {
     const foundProducts = await this.productSchema
       .createQueryBuilder('product')
       .where('product_id IN (:...ids)', {
@@ -36,6 +26,33 @@ export class OrderService {
       .leftJoinAndSelect('contain_articles.art_id', 'articles')
       .getMany()
 
-    return this.productService.countAvaliableQuantity(foundProducts)
+    const productsWithUpdatedQuantites = foundProducts.map(item => {
+      const foundProduct = products.find(
+        ({ product_id }) => item.product_id === product_id
+      )
+
+      return {
+        ...item,
+        quantity: foundProduct.quantity
+      }
+    })
+
+    return productsWithUpdatedQuantites
+  }
+
+  async submitOrder(input: CreateOrderInput) {
+    const updatedProducts = await this.updateProductsQuantity(input)
+
+    await this.productService.updateArticleStock(updatedProducts)
+
+    return updatedProducts
+  }
+
+  async checkOrder(input: CreateOrderInput) {
+    const productsWithUpdatedQuantites = await this.updateProductsQuantity(
+      input
+    )
+
+    return this.productService.countQuantity(productsWithUpdatedQuantites)
   }
 }

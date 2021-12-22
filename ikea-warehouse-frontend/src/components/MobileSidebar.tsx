@@ -67,7 +67,7 @@ export const MobileSidebar: React.FC<Props> = ({
               <div className="flex-shrink-0 flex items-center px-4">
                 <img
                   className="h-8 w-auto"
-                  src="https://tailwindui.com/img/logos/workflow-logo-indigo-500-mark-white-text.svg"
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Ikea_logo.svg/640px-Ikea_logo.svg.png"
                   alt="Workflow"
                 />
               </div>
@@ -75,7 +75,6 @@ export const MobileSidebar: React.FC<Props> = ({
                 {navigation.map(item => (
                   <a
                     key={item.name}
-                    href={item.href}
                     className={classNames(
                       item.current
                         ? 'bg-gray-900 text-white'
