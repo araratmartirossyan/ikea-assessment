@@ -20,6 +20,8 @@ services:
     build:
       context: ./ikea-warehouse
       target: development
+    networks:
+      - api
     environment:
       - WAIT_HOSTS=db:3306
       - MYSQL_DATABASE=${DB_NAME}
@@ -37,6 +39,8 @@ services:
       - db
   frontend:
     container_name: ikea-warehouse-frontend
+    networks:
+      - api
     build:
       context: ./ikea-warehouse-frontend
       dockerfile: ./Dockerfile
@@ -48,4 +52,5 @@ services:
     volumes:
       - ./ikea-warehouse-frontend:/app
       - /app/node_modules
-  
+networks:
+  api:
