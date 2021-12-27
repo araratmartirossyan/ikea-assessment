@@ -44,7 +44,7 @@
     // I tried a different approach (Recursy, Reduce, Subtract items one by one) I tried to find a better way to return value as fast as possible and keep it readable. And basically, too many copy operations are pretty slow but using pure "for" is not readable. So I chose this way.
   })
 ```
-9. Met a problem that types or does not show decimals as a number but a string. But before googling it I tried to find a solution by myself, looks like a simple 
+9. Met a problem that types does not show decimals as a number but a string. But before googling it I tried to find a solution by myself, looks like a simple flag fixing it.
 ```js
  extra: {
     decimalNumbers: true
